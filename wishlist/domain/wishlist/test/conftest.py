@@ -1,5 +1,6 @@
 import pytest
 
+from wishlist.domain.customer.models import Customer
 from wishlist.domain.wishlist.models import WishList
 
 
@@ -15,13 +16,12 @@ def product_ids():
 
 
 @pytest.fixture
-def product_ids_with_unknown_ids():
+def product_ids_with_duplication(wishlist_response):
     return [
-        '1',
-        'unknown-2',
-        '3',
-        'unknown-4',
-        '5'
+        *wishlist_response.product_ids,
+        'fake-product-id-6',
+        'fake-product-id-7',
+        'fake-product-id-8'
     ]
 
 
@@ -38,3 +38,28 @@ def wishlist_response():
             'fake-product-id-5'
         ]
     )
+
+
+@pytest.fixture
+def found_customer():
+    return Customer(
+        id='fake-id',
+        name='Guilherme',
+        email='fake-mail@test.com'
+    )
+
+
+@pytest.fixture
+def wishlist_response_customer_id_projected():
+    return WishList(
+        customer_id='fake-customer-id'
+    )
+
+
+@pytest.fixture
+def update_wishlist_request(product_ids):
+    return {
+        'id': 'fake-id',
+        'customer_id': 'fake-customer-id',
+        'product_ids': product_ids
+    }

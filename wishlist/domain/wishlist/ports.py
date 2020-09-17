@@ -11,7 +11,10 @@ from wishlist.domain.wishlist.adapters import (
     FindWishListAdapter,
     UpdateWishListAdapter
 )
-from wishlist.domain.wishlist.exceptions import AddProductsError
+from wishlist.domain.wishlist.exceptions import (
+    AddProductsError,
+    NoValidProductsError
+)
 from wishlist.domain.wishlist.models import WishList
 
 
@@ -73,7 +76,7 @@ class UpdateWishList(UpdateWishListPort):
         self._update_wishlist_adapter = update_wishlist_adapter
 
     async def update(self, wishlist: WishList) -> bool:
-        return await self._update_product_adapter(wishlist)
+        return await self._update_wishlist_adapter(wishlist)
 
 
 class AddProducts(AddProductsPort):
@@ -100,12 +103,12 @@ class AddProducts(AddProductsPort):
         if not customer_exists:
             raise CustomerNotFoundError()
 
-        validproduct_ids = await self._get_validproduct_ids(product_ids)
-        if not validproduct_ids:
-            return
+        valid_product_ids = await self._get_valid_product_ids(product_ids)
+        if not valid_product_ids:
+            raise NoValidProductsError()
 
         unique_product_ids = self._get_unique_product_ids(
-            validproduct_ids
+            valid_product_ids
         )
 
         wishlist = await self._find_wishlist_port.find_customer_wishlist(
@@ -136,11 +139,11 @@ class AddProducts(AddProductsPort):
 
         return wishlist
 
-    async def _get_validproduct_ids(
+    async def _get_valid_product_ids(
         self,
         product_ids: List[str]
     ) -> List[str]:
-        validproduct_ids = []
+        valid_product_ids = []
         for product_id in product_ids:
             product_exists = await self._find_product_port.id_exists(
                 product_id
@@ -149,9 +152,9 @@ class AddProducts(AddProductsPort):
             if not product_exists:
                 continue
 
-            validproduct_ids.append(product_id)
+            valid_product_ids.append(product_id)
 
-        return validproduct_ids
+        return valid_product_ids
 
     def _get_unique_product_ids(
         self,
