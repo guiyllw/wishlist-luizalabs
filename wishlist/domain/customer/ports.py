@@ -44,11 +44,11 @@ class FindCustomerPort(metaclass=abc.ABCMeta):
 
     async def find_by_id(
         self,
-        id: str,
+        id_: str,
         projection: Optional[List[str]] = None
     ) -> Customer:
         return await self.find_one({
-            'id': id
+            'id': id_
         }, projection)
 
     async def find_by_email(
@@ -60,8 +60,8 @@ class FindCustomerPort(metaclass=abc.ABCMeta):
             'email': email
         }, projection)
 
-    async def idexists(self, id: str) -> bool:
-        registered_customer = await self.find_by_id(id, ['id'])
+    async def id_exists(self, id_: str) -> bool:
+        registered_customer = await self.find_by_id(id_, ['id'])
         return bool(registered_customer)
 
 
@@ -106,8 +106,8 @@ class UpdateCustomer(UpdateCustomerPort):
         self._find_customer_port = find_customer_port
 
     async def update(self, customer: Customer) -> bool:
-        idexists = await self._find_customer_port.idexists(customer.id)
-        if not idexists:
+        id_exists = await self._find_customer_port.id_exists(customer.id)
+        if not id_exists:
             raise CustomerNotFoundError()
 
         email_already_registered = await self._email_already_registered(
@@ -122,7 +122,7 @@ class UpdateCustomer(UpdateCustomerPort):
 
     async def _email_already_registered(
         self,
-        id: str,
+        id_: str,
         email: str
     ):
         registered_customer = await self._find_customer_port.find_by_email(
@@ -130,7 +130,7 @@ class UpdateCustomer(UpdateCustomerPort):
             ['id']
         )
 
-        if registered_customer.id != id:
+        if registered_customer.id != id_:
             return True
 
         return False
@@ -175,7 +175,7 @@ class DeleteCustomer(DeleteCustomerPort):
     ):
         self._delete_customer_adapter = delete_customer_adapter
 
-    async def delete(self, id: str) -> str:
+    async def delete(self, id_: str) -> str:
         return await self._delete_customer_adapter.delete(
-            id
+            id_
         )

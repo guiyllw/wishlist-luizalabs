@@ -28,7 +28,7 @@ def product_ids_with_unknown_ids():
 @pytest.fixture
 def wishlist_response():
     return WishList(
-        id_='fake-id',
+        id='fake-id',
         customer_id='fake-customer-id',
         product_ids=[
             'fake-product-id-1',

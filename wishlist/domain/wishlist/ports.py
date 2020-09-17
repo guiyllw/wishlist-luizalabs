@@ -96,7 +96,7 @@ class AddProducts(AddProductsPort):
         customer_id: str,
         product_ids: List[str]
     ) -> WishList:
-        customer_exists = await self._find_customer_port.idexists(customer_id)
+        customer_exists = await self._find_customer_port.id_exists(customer_id)
         if not customer_exists:
             raise CustomerNotFoundError()
 
@@ -142,7 +142,7 @@ class AddProducts(AddProductsPort):
     ) -> List[str]:
         validproduct_ids = []
         for product_id in product_ids:
-            product_exists = await self._find_product_port.idexists(
+            product_exists = await self._find_product_port.id_exists(
                 product_id
             )
 

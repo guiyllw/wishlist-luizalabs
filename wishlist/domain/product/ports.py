@@ -40,15 +40,15 @@ class FindProductPort(metaclass=abc.ABCMeta):
 
     async def find_by_id(
         self,
-        id: str,
+        id_: str,
         projection: Optional[List[str]] = None
     ) -> Product:
         return await self.find_one({
-            'id': id
+            'id': id_
         }, projection)
 
-    async def idexists(self, id: str) -> bool:
-        registered_product = await self.find_by_id(id, ['id'])
+    async def id_exists(self, id_: str) -> bool:
+        registered_product = await self.find_by_id(id_, ['id'])
         return bool(registered_product)
 
 
@@ -138,7 +138,7 @@ class DeleteProduct(DeleteProductPort):
     ):
         self._delete_product_adapter = delete_product_adapter
 
-    async def delete(self, id: str) -> str:
+    async def delete(self, id_: str) -> str:
         return await self._delete_product_adapter.delete(
-            id
+            id_
         )

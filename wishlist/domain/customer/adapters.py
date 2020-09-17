@@ -33,5 +33,5 @@ class FindCustomerAdapter(metaclass=abc.ABCMeta):
 
 
 class DeleteCustomerAdapter(metaclass=abc.ABCMeta):
-    async def delete(self, id: str) -> str:
+    async def delete(self, id_: str) -> str:
         pass  # pragma: no-cover
