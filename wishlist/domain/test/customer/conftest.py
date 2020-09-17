@@ -14,7 +14,7 @@ def create_customer_request():
 @pytest.fixture
 def customer_response(create_customer_request):
     return Customer(
-        id_='fake-id',
+        id='fake-id',
         name=create_customer_request['name'],
         email=create_customer_request['email']
     )
@@ -53,6 +53,6 @@ def customer_list_response_email_projected(customer_response_email_projected):
 def update_customer_request():
     return {
         'id': 'fake-id',
-        'name': 'Guilherme',
-        'email': 'fake-mail@test.com'
+        'name': 'Guilherme Vasconcellos',
+        'email': 'fake-mail-2@test.com'
     }

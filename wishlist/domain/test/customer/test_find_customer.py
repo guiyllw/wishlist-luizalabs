@@ -33,7 +33,7 @@ class TestFindCustomer:
 
         assert customer.email == create_customer_request['email']
         assert customer.name is None
-        assert customer.id_ is None
+        assert customer.id is None
 
     async def test_find_all_with_all_fields_succeeded(
         self,
@@ -67,4 +67,4 @@ class TestFindCustomer:
 
         assert customers[0].email == create_customer_request['email']
         assert customers[0].name is None
-        assert customers[0].id_ is None
+        assert customers[0].id is None
