@@ -11,10 +11,7 @@ from wishlist.domain.wishlist.adapters import (
     FindWishListAdapter,
     UpdateWishListAdapter
 )
-from wishlist.domain.wishlist.exceptions import (
-    AddProductsError,
-    NoValidProductsError
-)
+from wishlist.domain.wishlist.exceptions import NoValidProductsError
 from wishlist.domain.wishlist.models import WishList
 
 
@@ -43,6 +40,14 @@ class UpdateWishListPort(metaclass=abc.ABCMeta):
         pass  # pragma: no-cover
 
 
+class RemoveProductsPort(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    async def remove_products(
+        self, customer_id: str, product_ids: List[str]
+    ) -> bool:
+        pass  # pragma: no-cover
+
+
 class FindWishList(FindWishListPort):
     def __init__(self, find_wishlist_adapter: FindWishListAdapter):
         self._find_wishlist_adapter = find_wishlist_adapter
@@ -56,7 +61,7 @@ class UpdateWishList(UpdateWishListPort):
         self._update_wishlist_adapter = update_wishlist_adapter
 
     async def update(self, wishlist: Dict) -> bool:
-        return await self._update_wishlist_adapter(wishlist)
+        return await self._update_wishlist_adapter.update(wishlist)
 
 
 class AddProducts(AddProductsPort):
@@ -75,8 +80,11 @@ class AddProducts(AddProductsPort):
         self._find_product_port = find_product_port
 
     async def add_to_list(
-        self, customer_id: str, product_ids: List[str]
+        self, add_products_request: Dict
     ) -> WishList:
+        customer_id = add_products_request['customer_id']
+        product_ids = add_products_request['product_ids']
+
         customer_exists = await self._find_customer_port.find_by_id(
             customer_id
         )
@@ -96,13 +104,11 @@ class AddProducts(AddProductsPort):
         )
 
         if not wishlist:
-            return await self._add_products_adapter.create(
-                WishList(
-                    id=str(uuid4()),
-                    customer_id=customer_id,
-                    product_ids=unique_product_ids
-                )
-            )
+            return await self._add_products_adapter.create({
+                'id': str(uuid4()),
+                'customer_id': customer_id,
+                'product_ids': unique_product_ids
+            })
 
         unique_product_ids = self._get_unique_product_ids([
             *wishlist.product_ids,
@@ -111,10 +117,7 @@ class AddProducts(AddProductsPort):
 
         wishlist.product_ids = unique_product_ids
 
-        updated = await self._update_wishlist_port.update(wishlist)
-        if not updated:
-            raise AddProductsError()
-
+        await self._update_wishlist_port.update(wishlist.dict())
         return wishlist
 
     async def _get_valid_product_ids(
@@ -135,3 +138,34 @@ class AddProducts(AddProductsPort):
 
     def _get_unique_product_ids(self, product_ids: List[str]) -> List[str]:
         return list(set(product_ids))
+
+
+class RemoveProducts(RemoveProductsPort):
+    def __init__(
+        self,
+        find_wishlist_port: FindWishListPort,
+        update_wishlist_port: UpdateWishListPort
+    ):
+        self._find_wishlist_port = find_wishlist_port
+        self._update_wishlist_port = update_wishlist_port
+
+    async def remove_products(
+        self, customer_id: str, product_ids: List[str]
+    ) -> bool:
+        wishlist = await self._find_wishlist_port.find_customer_wishlist(
+            customer_id
+        )
+
+        if not wishlist:
+            return False
+
+        new_product_ids = []
+        for product_id in wishlist.product_ids:
+            if product_id in product_ids:
+                continue
+
+            new_product_ids.append(product_id)
+
+        wishlist.product_ids = new_product_ids
+
+        return await self._update_wishlist_port.update(wishlist.dict())

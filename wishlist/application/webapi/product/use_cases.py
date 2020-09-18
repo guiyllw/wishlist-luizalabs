@@ -46,11 +46,17 @@ async def create_product(
 async def update_product(
     update_product_request: FullProduct
 ) -> FullProduct:
-    await update_product_port.update(
-        update_product_request.dict()
-    )
+    try:
+        updated = await update_product_port.update(
+            update_product_request.dict()
+        )
 
-    return Response(status_code=HTTPStatus.OK)
+        if not updated:
+            raise ProductNotFoundError()
+
+        return Response(status_code=HTTPStatus.OK)
+    except ProductNotFoundError as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
 
 
 @router.get('/{id_}')

@@ -64,9 +64,12 @@ async def update_customer(
     update_customer_request: FullCustomer
 ) -> FullCustomer:
     try:
-        await update_customer_port.update(
+        updated = await update_customer_port.update(
             update_customer_request.dict()
         )
+
+        if not updated:
+            raise CustomerNotFoundError()
 
         return Response(status_code=HTTPStatus.OK)
     except CustomerAlreadyRegisteredError as e:

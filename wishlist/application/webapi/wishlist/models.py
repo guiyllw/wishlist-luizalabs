@@ -9,7 +9,13 @@ class AddProductsRequest(SerializableModel):
     product_ids: List[str]
 
 
-class CustomerWishListResponse(SerializableModel):
+class CustomerWishList(SerializableModel):
+    id: str
+    customer_id: str
+    product_ids: List[str]
+
+
+class FullCustomerWishList(SerializableModel):
     id: str
     customer_id: str
     products: List[FullProduct]

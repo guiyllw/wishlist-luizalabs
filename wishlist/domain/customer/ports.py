@@ -71,9 +71,8 @@ class CreateCustomer(CreateCustomerPort):
         if email_exists:
             raise CustomerAlreadyRegisteredError()
 
-        return await self._create_customer_adapter.create(
-            Customer(id=str(uuid4()), **customer)
-        )
+        customer['id'] = str(uuid4())
+        return await self._create_customer_adapter.create(customer)
 
 
 class UpdateCustomer(UpdateCustomerPort):

@@ -1,7 +1,6 @@
 import operator
 from datetime import datetime
 
-import stringcase
 from pydantic import BaseModel
 
 
@@ -11,7 +10,6 @@ class SerializableModel(BaseModel):
         arbitrary_types_allowed = True
         ignore_extra = True
 
-        alias_generator = stringcase.camelcase
         json_encoders = {
             datetime: operator.methodcaller('isoformat')
         }
@@ -19,7 +17,6 @@ class SerializableModel(BaseModel):
     def dict(self, *args, **kwargs):
         kwargs = {
             **kwargs,
-            'by_alias': True,
             'exclude_none': True
         }
 

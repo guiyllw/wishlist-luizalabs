@@ -51,9 +51,8 @@ class CreateProduct(CreateProductPort):
         self._create_product_adapter = create_product_adapter
 
     async def create(self, product: Dict) -> Product:
-        return await self._create_product_adapter.create(
-            Product(id=str(uuid4()), **product)
-        )
+        product['id'] = str(uuid4())
+        return await self._create_product_adapter.create(product)
 
 
 class UpdateProduct(UpdateProductPort):

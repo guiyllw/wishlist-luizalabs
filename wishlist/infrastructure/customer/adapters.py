@@ -20,8 +20,8 @@ class CustomerAdapter(
         self._repository = MongoRepository('customer')
 
     async def create(self, customer: Dict) -> Customer:
-        id_ = await self._repository.create(customer)
-        return Customer(id=id_, **customer)
+        await self._repository.create(customer)
+        return Customer(**customer)
 
     async def update(self, customer: Dict) -> bool:
         return await self._repository.update(customer['id'], customer)

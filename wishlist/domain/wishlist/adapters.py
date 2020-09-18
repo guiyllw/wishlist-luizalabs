@@ -1,5 +1,5 @@
 import abc
-from typing import Dict
+from typing import Dict, List
 
 from wishlist.domain.wishlist.models import WishList
 

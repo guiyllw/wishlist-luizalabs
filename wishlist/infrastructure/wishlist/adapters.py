@@ -6,7 +6,7 @@ from wishlist.domain.wishlist.adapters import (
     UpdateWishListAdapter
 )
 from wishlist.domain.wishlist.models import WishList
-from wishlist.infrastructure.common.databases import MongoDB
+from wishlist.infrastructure.common.repositories import MongoRepository
 
 
 class WishListAdapter(
@@ -15,11 +15,11 @@ class WishListAdapter(
     FindWishListAdapter
 ):
     def __init__(self):
-        self._collection = MongoDB().get_collection('wishlist')
+        self._repository = MongoRepository('wishlist')
 
     async def create(self, wishlist: Dict) -> WishList:
-        id_ = await self._repository.create(wishlist)
-        return WishList(id=id_, **wishlist)
+        await self._repository.create(wishlist)
+        return WishList(**wishlist)
 
     async def update(self, wishlist: Dict) -> bool:
         return await self._repository.update(wishlist['id'], wishlist)

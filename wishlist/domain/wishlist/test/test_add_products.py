@@ -21,10 +21,10 @@ class TestAddProducts:
             AsyncMock(return_value=True)
         )
 
-        wishlist = await add_products.add_to_list(
-            'fake-customer-id',
-            product_ids
-        )
+        wishlist = await add_products.add_to_list({
+            'customer_id': 'fake-customer-id',
+            'product_ids': product_ids
+        })
 
         assert wishlist == wishlist_response
 
@@ -42,10 +42,10 @@ class TestAddProducts:
         )
 
         with pytest.raises(CustomerNotFoundError):
-            await add_products.add_to_list(
-                'fake-customer-id',
-                product_ids
-            )
+            await add_products.add_to_list({
+                'customer_id': 'fake-customer-id',
+                'product_ids': product_ids
+            })
 
     async def test_add_products_with_invalid_products_raises(
         self,
@@ -61,10 +61,10 @@ class TestAddProducts:
         )
 
         with pytest.raises(NoValidProductsError):
-            await add_products.add_to_list(
-                'fake-customer-id',
-                []
-            )
+            await add_products.add_to_list({
+                'customer_id': 'fake-customer-id',
+                'product_ids': []
+            })
 
     async def test_add_products_with_existent_list_with_success(
         self,
@@ -80,10 +80,10 @@ class TestAddProducts:
             AsyncMock(return_value=True)
         )
 
-        wishlist = await add_products.add_to_list(
-            'fake-customer-id',
-            product_ids
-        )
+        wishlist = await add_products.add_to_list({
+            'customer_id': 'fake-customer-id',
+            'product_ids': product_ids
+        })
 
         assert wishlist == wishlist_response
 
@@ -101,10 +101,10 @@ class TestAddProducts:
             AsyncMock(return_value=True)
         )
 
-        wishlist = await add_products.add_to_list(
-            'fake-customer-id',
-            product_ids
-        )
+        wishlist = await add_products.add_to_list({
+            'customer_id': 'fake-customer-id',
+            'product_ids': product_ids
+        })
 
         assert all(
             product_id in wishlist.product_ids

@@ -20,8 +20,8 @@ class ProductAdapter(
         self._repository = MongoRepository('product')
 
     async def create(self, product: Dict) -> Product:
-        id_ = await self._repository.create(product)
-        return Product(id=id_, **product)
+        await self._repository.create(product)
+        return Product(**product)
 
     async def update(self, product: Dict) -> bool:
         return await self._repository.update(product['id'], product)

@@ -1,5 +1,5 @@
 webapi:
-	@uvicorn wishlist.webapi:app
+	@docker-compose up -d
 
 webapi-dev:
 	@uvicorn --reload wishlist.webapi:app
@@ -16,11 +16,11 @@ clean:
 
 lint:
 	@isort . --check
-	@flake8
+	@autopep8 . -r --diff
 
 format:
 	@isort .
-	@flake8
+	@autopep8 . -r --in-place
 
 safety:
 	@pipenv check
