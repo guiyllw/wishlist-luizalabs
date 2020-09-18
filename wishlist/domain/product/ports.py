@@ -51,7 +51,7 @@ class CreateProduct(CreateProductPort):
         self._create_product_adapter = create_product_adapter
 
     async def create(self, product: Dict) -> Product:
-        return await self._create_product_adapter(
+        return await self._create_product_adapter.create(
             Product(id=str(uuid4()), **product)
         )
 
@@ -64,7 +64,7 @@ class UpdateProduct(UpdateProductPort):
         self._update_product_adapter = update_product_adapter
 
     async def update(self, product: Dict) -> bool:
-        return await self._update_product_adapter(product)
+        return await self._update_product_adapter.update(product)
 
 
 class FindProduct(FindProductPort):

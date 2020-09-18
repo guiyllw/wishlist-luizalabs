@@ -18,11 +18,11 @@ from wishlist.domain.wishlist.ports import (
 )
 from wishlist.infrastructure.customer.adapters import CustomerAdapter
 from wishlist.infrastructure.product.adapters import ProductAdapter
-from wishlist.infrastructure.wishlist.adapters import WishListMongoAdapter
+from wishlist.infrastructure.wishlist.adapters import WishListAdapter
 
 router = APIRouter()
 
-wishlist_adapter = WishListMongoAdapter()
+wishlist_adapter = WishListAdapter()
 customer_adapter = CustomerAdapter()
 product_adapter = ProductAdapter()
 

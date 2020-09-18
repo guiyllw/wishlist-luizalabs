@@ -97,9 +97,7 @@ class UpdateCustomer(UpdateCustomerPort):
         if email_already_registered:
             raise CustomerAlreadyRegisteredError()
 
-        return await self._update_customer_adapter.update(
-            Customer(**customer)
-        )
+        return await self._update_customer_adapter.update(customer)
 
     async def _email_already_registered(self, id_: str, email: str):
         registered_customer = await self._find_customer_port.find_by_email(
@@ -117,23 +115,12 @@ class FindCustomer(FindCustomerPort):
         self._find_customer_adapter = find_customer_adapter
 
     async def find_one(self, query: Dict) -> Customer:
-        customer = await self._find_customer_adapter.find_one(query)
-
-        if not customer:
-            return None
-
-        return Customer(**customer)
+        return await self._find_customer_adapter.find_one(query)
 
     async def find_all(
         self, query: Dict, page: int, size: int
     ) -> (Dict, List[Customer]):
-        meta, customers = await self._find_customer_adapter.find_all(
-            query,
-            page,
-            size
-        )
-
-        return (meta, [Customer(**c) for c in customers])
+        return await self._find_customer_adapter.find_all(query, page, size)
 
 
 class DeleteCustomer(DeleteCustomerPort):

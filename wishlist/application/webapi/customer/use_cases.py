@@ -50,13 +50,13 @@ async def create_customer(
         )
 
         return JSONResponse(
-            content=created_customer.dict(),
+            content=FullCustomer(**created_customer.dict()).dict(),
             status_code=HTTPStatus.CREATED
         )
-    except CustomerAlreadyRegisteredError:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST)
-    except CustomerNotFoundError:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
+    except CustomerAlreadyRegisteredError as e:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
+    except CustomerNotFoundError as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
 
 
 @router.put('/')
@@ -69,28 +69,31 @@ async def update_customer(
         )
 
         return Response(status_code=HTTPStatus.OK)
-    except CustomerAlreadyRegisteredError:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST)
-    except CustomerNotFoundError:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
+    except CustomerAlreadyRegisteredError as e:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
+    except CustomerNotFoundError as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
 
 
 @router.get('/{id_}')
-async def find_one_customer(
-    id_: str
-) -> FullCustomer:
-    customer = await find_customer_port.find_by_id(id_)
-    if not customer:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
+async def find_one_customer(id_: str) -> FullCustomer:
+    try:
+        customer = await find_customer_port.find_by_id(id_)
+        if not customer:
+            raise CustomerNotFoundError()
 
-    return JSONResponse(
-        content=customer.dict(),
-        status_code=HTTPStatus.OK
-    )
+        return JSONResponse(
+            content=FullCustomer(**customer.dict()).dict(),
+            status_code=HTTPStatus.OK
+        )
+    except CustomerNotFoundError as e:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
 
 
 @router.get('/')
-async def find_all_customer(page: int, size: int = 10) -> CustomerListResponse:
+async def find_all_customer(
+    page: int, size: int = 10
+) -> CustomerListResponse:
     meta, customers = await find_customer_port.find_all(
         query={},
         page=page,

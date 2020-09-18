@@ -1,7 +1,7 @@
 from typing import List
 
 from wishlist.application.webapi.common.models import SerializableModel
-from wishlist.application.webapi.product.models import ProductResponse
+from wishlist.application.webapi.product.models import FullProduct
 
 
 class AddProductsRequest(SerializableModel):
@@ -12,4 +12,4 @@ class AddProductsRequest(SerializableModel):
 class CustomerWishListResponse(SerializableModel):
     id: str
     customer_id: str
-    products: List[ProductResponse]
+    products: List[FullProduct]

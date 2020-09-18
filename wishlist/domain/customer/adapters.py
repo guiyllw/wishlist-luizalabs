@@ -6,13 +6,13 @@ from wishlist.domain.customer.models import Customer
 
 class CreateCustomerAdapter(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    async def create(self, customer: Customer) -> Customer:
+    async def create(self, customer: Dict) -> Customer:
         pass  # pragma: no-cover
 
 
 class UpdateCustomerAdapter(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    async def update(self, customer: Customer) -> bool:
+    async def update(self, customer: Dict) -> bool:
         pass  # pragma: no-cover
 
 

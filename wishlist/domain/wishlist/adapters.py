@@ -6,13 +6,13 @@ from wishlist.domain.wishlist.models import WishList
 
 class AddProductsAdapter(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    async def add_to_list(self, WishList) -> WishList:
+    async def create(self, Dict) -> WishList:
         pass  # pragma: no-cover
 
 
 class UpdateWishListAdapter(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    async def update(self, wishlist: WishList) -> bool:
+    async def update(self, wishlist: Dict) -> bool:
         pass  # pragma: no-cover
 
 
