@@ -8,4 +8,4 @@ EXPOSE 8000
 
 RUN pip install -r requirements.txt	
 
-ENTRYPOINT ["uvicorn", "wishlist.webapi:app"]
+ENTRYPOINT ["uvicorn", "--host", "0.0.0.0", "wishlist.webapi:app"]

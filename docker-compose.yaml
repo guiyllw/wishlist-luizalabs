@@ -11,10 +11,8 @@ services:
       APP_HOST: http://localhost:8000
       MONGO_URI: mongodb://mongo:27017
       MONGO_DB: wishlist
-      REDIS_URI: redis:6379
     depends_on:
       - mongo
-      - redis
     restart: always
 
   mongo:
@@ -22,12 +20,5 @@ services:
     container_name: mongo
     ports:
       - 27017:27017
-    restart: always
-  
-  redis:
-    image: redis
-    container_name: redis
-    ports:
-      - 6379:6379
     restart: always
   

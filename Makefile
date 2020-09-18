@@ -1,5 +1,7 @@
 webapi:
-	@docker-compose up -d
+	@pipenv run pip freeze > requirements.txt
+	@docker-compose up -d --build
+	@rm requirements.txt
 
 webapi-dev:
 	@uvicorn --reload wishlist.webapi:app
@@ -14,6 +16,15 @@ clean:
 	@rm -f .coverage
 	@rm -f coverage.xml
 
+test:
+	@pytest
+
+test-match:
+	@pytest -k ${Q}
+
+test-coverage:
+	@pytest --cov wishlist
+
 lint:
 	@isort . --check
 	@autopep8 . -r --diff
@@ -23,4 +34,4 @@ format:
 	@autopep8 . -r --in-place
 
 safety:
-	@pipenv check
+	@safety check
