@@ -1,3 +1,9 @@
+webapi:
+	@uvicorn wishlist.webapi:app
+
+webapi-dev:
+	@uvicorn --reload wishlist.webapi:app
+
 clean:
 	@find . -name "*.pyc" | xargs rm -rf
 	@find . -name "*.pyo" | xargs rm -rf

@@ -1,11 +1,12 @@
-from dataclasses import dataclass
+from typing import Optional
+
+from pydantic import BaseModel
 
 
-@dataclass
-class Product:
-    id: str = None
-    price: float = None
-    image: str = None
-    brand: str = None
-    title: str = None
-    review_score: float = None
+class Product(BaseModel):
+    id: Optional[str] = None
+    price: Optional[float] = None
+    image: Optional[str] = None
+    brand: Optional[str] = None
+    title: Optional[str] = None
+    review_score: Optional[float] = None

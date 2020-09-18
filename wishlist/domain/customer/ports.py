@@ -1,5 +1,5 @@
 import abc
-from typing import Dict, List, Optional
+from typing import Dict, List
 from uuid import uuid4
 
 from wishlist.domain.customer.adapters import (
@@ -16,57 +16,42 @@ from wishlist.domain.customer.models import Customer
 
 
 class CreateCustomerPort(metaclass=abc.ABCMeta):
-    async def create(self, create_customer_request: Dict) -> Customer:
+    @abc.abstractmethod
+    async def create(self, customer: Dict) -> Customer:
         pass  # pragma: no-cover
 
 
 class UpdateCustomerPort(metaclass=abc.ABCMeta):
-    async def update(self, customer: Customer) -> bool:
+    @abc.abstractmethod
+    async def update(self, customer: Dict) -> bool:
         pass  # pragma: no-cover
 
 
 class FindCustomerPort(metaclass=abc.ABCMeta):
-    async def find_one(
-        self,
-        query: Dict,
-        projection: Optional[List[str]] = None
-    ) -> Customer:
+    @abc.abstractmethod
+    async def find_one(self, query: Dict) -> Customer:
         pass  # pragma: no-cover
 
+    @abc.abstractmethod
     async def find_all(
-        self,
-        query: Dict,
-        page: int,
-        size: int,
-        projection: Optional[List[str]] = None
+        self, query: Dict, page: int, size: int
     ) -> (Dict, List[Customer]):
         pass  # pragma: no-cover
 
-    async def find_by_id(
-        self,
-        id_: str,
-        projection: Optional[List[str]] = None
-    ) -> Customer:
+    async def find_by_id(self, id_: str) -> Customer:
         return await self.find_one({
             'id': id_
-        }, projection)
+        })
 
-    async def find_by_email(
-        self,
-        email: str,
-        projection: Optional[List[str]] = None
-    ) -> Customer:
+    async def find_by_email(self, email: str) -> Customer:
         return await self.find_one({
             'email': email
-        }, projection)
-
-    async def id_exists(self, id_: str) -> bool:
-        registered_customer = await self.find_by_id(id_, ['id'])
-        return bool(registered_customer)
+        })
 
 
 class DeleteCustomerPort(metaclass=abc.ABCMeta):
-    async def delete(self, input) -> str:
+    @abc.abstractmethod
+    async def delete(self, id_: str) -> int:
         pass  # pragma: no-cover
 
 
@@ -79,20 +64,15 @@ class CreateCustomer(CreateCustomerPort):
         self._create_customer_adapter = create_customer_adapter
         self._find_customer_port = find_customer_port
 
-    async def create(self, create_customer_request) -> Customer:
-        name = create_customer_request['name']
-        email = create_customer_request['email']
+    async def create(self, customer: Dict) -> Customer:
+        email = customer['email']
 
-        email_exists = await self._find_customer_port.email_exists(email)
+        email_exists = await self._find_customer_port.find_by_email(email)
         if email_exists:
             raise CustomerAlreadyRegisteredError()
 
-        return await self._create_customer_adapter(
-            Customer(
-                id=str(uuid4()),
-                name=name,
-                email=email
-            )
+        return await self._create_customer_adapter.create(
+            Customer(id=str(uuid4()), **customer)
         )
 
 
@@ -100,82 +80,65 @@ class UpdateCustomer(UpdateCustomerPort):
     def __init__(
         self,
         update_customer_adapter: UpdateCustomerAdapter,
-        find_customer_port: FindCustomerAdapter
+        find_customer_port: FindCustomerPort
     ):
         self._update_customer_adapter = update_customer_adapter
         self._find_customer_port = find_customer_port
 
-    async def update(self, customer: Customer) -> bool:
-        id_exists = await self._find_customer_port.id_exists(customer.id)
+    async def update(self, customer: Dict) -> bool:
+        id_exists = await self._find_customer_port.find_by_id(customer['id'])
         if not id_exists:
             raise CustomerNotFoundError()
 
         email_already_registered = await self._email_already_registered(
-            customer.id,
-            customer.email
+            customer['id'],
+            customer['email']
         )
-
         if email_already_registered:
             raise CustomerAlreadyRegisteredError()
 
-        return await self._update_customer_adapter(customer)
-
-    async def _email_already_registered(
-        self,
-        id_: str,
-        email: str
-    ):
-        registered_customer = await self._find_customer_port.find_by_email(
-            email,
-            ['id']
+        return await self._update_customer_adapter.update(
+            Customer(**customer)
         )
 
-        if registered_customer.id != id_:
+    async def _email_already_registered(self, id_: str, email: str):
+        registered_customer = await self._find_customer_port.find_by_email(
+            email
+        )
+
+        if registered_customer and registered_customer.id != id_:
             return True
 
         return False
 
 
 class FindCustomer(FindCustomerPort):
-    def __init__(
-        self,
-        find_customer_adapter: FindCustomerAdapter
-    ):
+    def __init__(self, find_customer_adapter: FindCustomerAdapter):
         self._find_customer_adapter = find_customer_adapter
 
-    async def find_one(
-        self,
-        query: Dict,
-        projection: Optional[List[str]] = None
-    ) -> Customer:
-        return await self._find_customer_adapter.find_one(
-            query,
-            projection
-        )
+    async def find_one(self, query: Dict) -> Customer:
+        customer = await self._find_customer_adapter.find_one(query)
+
+        if not customer:
+            return None
+
+        return Customer(**customer)
 
     async def find_all(
-        self,
-        query: Dict,
-        page: int,
-        size: int,
-        projection: Optional[List[str]] = None
+        self, query: Dict, page: int, size: int
     ) -> (Dict, List[Customer]):
-        return await self._find_customer_adapter.find_all(
+        meta, customers = await self._find_customer_adapter.find_all(
             query,
             page,
-            size,
-            projection
+            size
         )
+
+        return (meta, [Customer(**c) for c in customers])
 
 
 class DeleteCustomer(DeleteCustomerPort):
-    def __init__(
-        self,
-        delete_customer_adapter: DeleteCustomerAdapter
-    ):
+    def __init__(self, delete_customer_adapter: DeleteCustomerAdapter):
         self._delete_customer_adapter = delete_customer_adapter
 
-    async def delete(self, id_: str) -> str:
-        return await self._delete_customer_adapter.delete(
-            id_
-        )
+    async def delete(self, id_: str) -> int:
+        return await self._delete_customer_adapter.delete(id_)

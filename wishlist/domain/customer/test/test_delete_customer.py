@@ -13,11 +13,7 @@ class TestDeleteCustomer:
 
         assert n_deleted == 1
 
-    async def test_delete_customer_that_not_exists(
-        self,
-        update_customer_request,
-        customer_response
-    ):
+    async def test_delete_customer_that_not_exists(self):
         delete_customer = DeleteCustomer(
             AsyncMock(return_value=0)
         )

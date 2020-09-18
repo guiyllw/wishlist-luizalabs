@@ -11,6 +11,10 @@ autopep8 = "*"
 pytest = "*"
 isort = "*"
 pytest-aiohttp = "*"
+fastapi = "*"
+motor = "*"
+uvicorn = "*"
+stringcase = "*"
 
 [requires]
 python_version = "3.8"

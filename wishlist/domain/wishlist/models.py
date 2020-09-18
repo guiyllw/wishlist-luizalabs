@@ -1,9 +1,9 @@
-from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
+
+from pydantic import BaseModel
 
 
-@dataclass
-class WishList:
-    id: str = None
-    customer_id: str = None
-    product_ids: List[str] = None
+class WishList(BaseModel):
+    id: Optional[str] = None
+    customer_id: Optional[str] = None
+    product_ids: Optional[List[str]] = None

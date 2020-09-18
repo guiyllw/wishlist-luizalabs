@@ -9,27 +9,28 @@ class TestCreateCustomer:
 
     async def test_create_customer_with_success(
         self,
-        create_customer_request,
-        customer_response
+        customer_dict,
+        customer
     ):
+        del customer_dict['id']
         create_customer = CreateCustomer(
-            AsyncMock(return_value=customer_response),
+            AsyncMock(return_value=customer),
             AsyncMock()
         )
 
-        customer = await create_customer.create(create_customer_request)
+        customer = await create_customer.create(customer_dict)
 
-        assert customer == customer_response
+        assert customer == customer
 
     async def test_create_customer_with_duplicated_email(
         self,
-        create_customer_request,
-        customer_response
+        customer_dict,
+        customer
     ):
         create_customer = CreateCustomer(
             AsyncMock(),
-            AsyncMock(return_value=customer_response)
+            AsyncMock(return_value=customer)
         )
 
         with pytest.raises(CustomerAlreadyRegisteredError):
-            await create_customer.create(create_customer_request)
+            await create_customer.create(customer_dict)

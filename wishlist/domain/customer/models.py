@@ -1,8 +1,9 @@
-from dataclasses import dataclass
+from typing import Optional
+
+from pydantic import BaseModel
 
 
-@dataclass
-class Customer:
-    id: str = None
-    name: str = None
-    email: str = None
+class Customer(BaseModel):
+    id: Optional[str] = None
+    name: Optional[str] = None
+    email: Optional[str] = None

@@ -1,5 +1,5 @@
 import abc
-from typing import Dict, List, Optional
+from typing import Dict, List
 from uuid import uuid4
 
 from wishlist.domain.customer.exceptions import CustomerNotFoundError
@@ -19,63 +19,43 @@ from wishlist.domain.wishlist.models import WishList
 
 
 class AddProductsPort(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
     async def add_to_list(
-        self,
-        customer_id: str,
-        product_ids: List[str]
+        self, customer_id: str, product_ids: List[str]
     ) -> WishList:
         pass  # pragma: no-cover
 
 
 class FindWishListPort(metaclass=abc.ABCMeta):
-    async def find_one(
-        self,
-        query: Dict,
-        projection: Optional[List[str]] = None
-    ) -> Customer:
+    @abc.abstractmethod
+    async def find_one(self, query: Dict) -> Customer:
         pass  # pragma: no-cover
 
-    async def find_customer_wishlist(
-        self,
-        customer_id: str,
-        projection: Optional[List[str]] = None
-    ):
+    async def find_customer_wishlist(self, customer_id: str):
         return await self.find_one({
             'customer_id': customer_id
-        }, projection)
+        })
 
 
 class UpdateWishListPort(metaclass=abc.ABCMeta):
-    async def update(self, wishlist: WishList) -> bool:
+    @abc.abstractmethod
+    async def update(self, wishlist: Dict) -> bool:
         pass  # pragma: no-cover
 
 
 class FindWishList(FindWishListPort):
-    def __init__(
-        self,
-        find_wishlist_adapter: FindWishListAdapter
-    ):
+    def __init__(self, find_wishlist_adapter: FindWishListAdapter):
         self._find_wishlist_adapter = find_wishlist_adapter
 
-    async def find_one(
-        self,
-        query: Dict,
-        projection: Optional[List[str]] = None
-    ) -> Customer:
-        return await self._find_wishlist_adapter.find_one(
-            query,
-            projection
-        )
+    async def find_one(self, query: Dict) -> WishList:
+        return await self._find_wishlist_adapter.find_one(query)
 
 
 class UpdateWishList(UpdateWishListPort):
-    def __init__(
-        self,
-        update_wishlist_adapter: UpdateWishListAdapter
-    ):
+    def __init__(self, update_wishlist_adapter: UpdateWishListAdapter):
         self._update_wishlist_adapter = update_wishlist_adapter
 
-    async def update(self, wishlist: WishList) -> bool:
+    async def update(self, wishlist: Dict) -> bool:
         return await self._update_wishlist_adapter(wishlist)
 
 
@@ -95,11 +75,11 @@ class AddProducts(AddProductsPort):
         self._find_product_port = find_product_port
 
     async def add_to_list(
-        self,
-        customer_id: str,
-        product_ids: List[str]
+        self, customer_id: str, product_ids: List[str]
     ) -> WishList:
-        customer_exists = await self._find_customer_port.id_exists(customer_id)
+        customer_exists = await self._find_customer_port.find_by_id(
+            customer_id
+        )
         if not customer_exists:
             raise CustomerNotFoundError()
 
@@ -130,22 +110,19 @@ class AddProducts(AddProductsPort):
         ])
 
         wishlist.product_ids = unique_product_ids
-        updated = await self._update_wishlist_port.update(
-            wishlist
-        )
 
+        updated = await self._update_wishlist_port.update(wishlist)
         if not updated:
             raise AddProductsError()
 
         return wishlist
 
     async def _get_valid_product_ids(
-        self,
-        product_ids: List[str]
+        self, product_ids: List[str]
     ) -> List[str]:
         valid_product_ids = []
         for product_id in product_ids:
-            product_exists = await self._find_product_port.id_exists(
+            product_exists = await self._find_product_port.find_by_id(
                 product_id
             )
 
@@ -156,9 +133,5 @@ class AddProducts(AddProductsPort):
 
         return valid_product_ids
 
-    def _get_unique_product_ids(
-        self,
-        product_ids: List[str]
-    ) -> List[str]:
-        unique_product_ids = set(product_ids)
-        return list(unique_product_ids)
+    def _get_unique_product_ids(self, product_ids: List[str]) -> List[str]:
+        return list(set(product_ids))
