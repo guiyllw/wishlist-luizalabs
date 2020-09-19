@@ -2,6 +2,13 @@
 
 Toda a aplicação foi desenvolvida utilizando a distribuição mint do linux na versão 20.
 
+### Documentação
+
+A documentação pode ser acessada em:
+
+http://localhost:8000/docs/
+http://localhost:8000/redoc/
+
 ## Desenvolvimento
 
 ### Requisitos
